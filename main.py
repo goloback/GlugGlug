@@ -1,7 +1,7 @@
 import random
 import sys
 import pygame
-from resource import main_player, monsters, prize, rope, bullet_system
+from resource import main_player, monsters, prize, rope, bullet_system, game_state
 
 def destroy_bullets():
     for bullet in bullet_system_object.bullets_list.copy():
@@ -49,12 +49,13 @@ def objects_touch(object1, object2):
         return False
 
 pygame.init()
-window = pygame.display.set_mode((1200, 700))
+window = pygame.display.set_mode((1200, 750))
 glug = main_player(window, 'left.png', 'right.png')
 rope = rope(window, 'rope.png', 'rope.png', glug)
 bullet_system_object = bullet_system(window, glug)
 amount_fish_1 = 30
 fish_list = []
+glug_glug_state = game_state(window)
 
 for i in range(amount_fish_1):
     fish = monsters(window, 'left_fish.png', 'right_fish.png')
@@ -83,6 +84,7 @@ while True:
     print(f'bullet{len(bullet_system_object.bullets_list)}')
     window.fill((0, 0, 0))
     all_actions(object_list)
+    glug_glug_state.show_state()
     for i in pygame.event.get():
         if i.type == pygame.QUIT:
             sys.exit()

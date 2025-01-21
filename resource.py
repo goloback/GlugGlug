@@ -79,19 +79,19 @@ class rope(game_object):
         self.player = player
         self.img_boat = pygame.image.load('boat.png')
         self.img_boat_rect = self.img_boat.get_rect()
-        self.img_boat_rect.top = 0
+        self.img_boat_rect.top = 50
         self.img_blue = pygame.image.load('blue.png')
         self.img_blue_rect = self.img_blue.get_rect()
         self.img_blue_rect2 = self.img_blue.get_rect()
-        self.img_blue_rect.top = -20
-        self.img_blue_rect2.top = -20
+        self.img_blue_rect.top = 30
+        self.img_blue_rect2.top = 30
         self.img_blue_rect.left = 0
         self.img_blue_rect2.right = 1200
         self.img_grass = pygame.image.load('grass.png')
         self.img_grass_rect = self.img_grass.get_rect()
         self.img_grass_rect2 = self.img_grass.get_rect()
-        self.img_grass_rect.bottom = 700
-        self.img_grass_rect2.bottom = 700
+        self.img_grass_rect.bottom = 750
+        self.img_grass_rect2.bottom = 750
         self.img_grass_rect.left = 0
         self.img_grass_rect2.right = 1200
 
@@ -117,7 +117,7 @@ class main_player(game_object):
     def __init__(self, window, imgleft, imgright):
         super().__init__(window, imgleft, imgright)
         self.rect.centerx = self.screen.get_rect().centerx
-        self.rect.top = 50
+        self.rect.top = 100
         self.move_down = False
         self.move_up = False
         self.move_left = False
@@ -126,23 +126,25 @@ class main_player(game_object):
         self.y = self.rect.centery
         self.x = self.rect.centerx
         self.image_move = 0
+        self.image = self.imgleft
+        self.image_move_left = pygame.image.load('moveL.png')
+        self.image_move_right = pygame.image.load('moveR.png')
 
     def move(self):
         speed_walk = 0.2
         speed = 0.5
         if self.move_down:
-            if self.rect.bottom < 660:
+            if self.rect.bottom < 710:
                 self.y += speed
                 self.rect.centery = float(self.y)
         if self.move_up:
-            if self.rect.top > 50:
+            if self.rect.top > 100:
                 self.y -= speed
                 self.rect.centery = float(self.y)
         if self.move_left:
-            self.image = self.imgleft
-            if self.rect.bottom >= 660:
+            self.walk_animation('Left')
+            if self.rect.bottom >= 710:
                 self.x -= speed_walk
-                self.walk_animation('Left')
             else:
                 self.x -= speed
             self.rect.centerx = self.x
@@ -150,8 +152,11 @@ class main_player(game_object):
                 self.x = self.screen.get_rect().right - 5
                 self.rect.left = self.x
         if self.move_right:
-            self.image = self.imgright
-            self.x += speed
+            self.walk_animation('Right')
+            if self.rect.bottom >= 710:
+                self.x += speed_walk
+            else:
+                self.x += speed
             self.rect.centerx = float(self.x)
             if self.rect.left > self.screen.get_rect().right + 5:
                 self.x = self.screen.get_rect().left + 5
@@ -160,19 +165,31 @@ class main_player(game_object):
     def check_touch(self):
         pass
     def walk_animation(self, direction):
+        if self.rect.bottom < 709:
+            if self.image != self.imgright and direction == 'Right':
+                self.image = self.imgright
+            if self.image != self.imgleft and direction == 'Left':
+                self.image = self.imgleft
+            return
         if direction == 'Left':
-            if self.image_move % 5 == 0:
+            if self.image_move % 40 == 0:
                 if self.image == self.imgleft:
-                    self.image = pygame.image.load('moveL.png')
+                    self.image = self.image_move_left
                 else:
-                    self.image = pygame.image.load('left.png')
-            self.image_move += 1
+                    self.image = self.imgleft
+        if direction == 'Right':
+            if self.image_move % 40 == 0:
+                if self.image == self.imgright:
+                    self.image = self.image_move_right
+                else:
+                    self.image = self.imgright
+        self.image_move += 1
 
 class monsters(game_object):
     def __init__(self, window, imgleft, imgright):
         super().__init__(window, imgleft, imgright)
         self.rect.centerx = 0
-        self.rect.top = random.randint(60, 630)
+        self.rect.top = random.randint(110, 680)
         self.new_point = True
         self.distance = 0
         self.x = self.rect.centerx
@@ -201,7 +218,7 @@ class prize(game_object):
     def __init__(self, window, image, glug):
         super().__init__(window, image, image)
         self.rect.centerx = random.randint(35, 1165)
-        self.rect.bottom = 660
+        self.rect.bottom = 7100
         self.free = True
         self.glug = glug
 
@@ -209,6 +226,28 @@ class prize(game_object):
         if self.free == False and self.show == True:
             self.rect.x = self.glug.rect.x
             self.rect.y = self.glug.y + 20
-            if self.glug.rect.top < 15:
+            if self.glug.rect.top < 105:
                 self.show = False
                 self.glug.hand = True
+
+class game_state():
+    def __init__(self, window):
+        self.level = 1
+        self.point = 0
+        self.hearts = 5
+        self.screen = window
+        self.font = pygame.font.Font(None, 25)
+        self.text_points = self.font.render(f'1:{self.get_text_points()}', True, (200, 200, 200), (0, 0, 0))
+        self.text_points_rect = self.text_points.get_rect()
+        self.text_points_rect.top = 5
+        self.text_points_rect.left = 5
+
+    def show_state(self):
+        self.screen.blit(self.text_points, self.text_points_rect)
+
+    def get_text_points(self):
+        strpoints = str(self.point)
+        while len(strpoints) < 6:
+            strpoints = '0'+strpoints
+        print(strpoints)
+        return strpoints
