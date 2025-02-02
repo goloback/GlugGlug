@@ -34,10 +34,18 @@ def all_actions(object_list):
                         object_list.remove(f)
                         if f in fish_list:
                             fish_list.remove(f)
+                    glug_glug_state.point += 35
+                    glug_glug_state.create_text_points()
     for i in prize_list:
         if objects_touch(glug, i) == True and glug.hand == True and i.show == True:
             i.free = False
             glug.hand = False
+            glug_glug_state.point += 25
+            glug_glug_state.create_text_points()
+        if i.prize_at_boat == True and i.get_points == False:
+            glug_glug_state.point += 40
+            glug_glug_state.create_text_points()
+            i.get_points = True
 
 def objects_touch(object1, object2):
     try:
@@ -50,15 +58,16 @@ def objects_touch(object1, object2):
 
 pygame.init()
 window = pygame.display.set_mode((1200, 750))
+glug_glug_state = game_state(window)
 glug = main_player(window, 'left.png', 'right.png')
 rope = rope(window, 'rope.png', 'rope.png', glug)
 bullet_system_object = bullet_system(window, glug)
 amount_fish_1 = 30
 fish_list = []
-glug_glug_state = game_state(window)
+
 
 for i in range(amount_fish_1):
-    fish = monsters(window, 'left_fish.png', 'right_fish.png')
+    fish = monsters(window, 'fishlv2.png', 'right_fish.png')
     if i % 2 == 0:
         fish.rect.centerx -= random.randint(0, 10000)
     else:

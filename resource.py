@@ -32,7 +32,7 @@ class bullet(game_object):
         self.rect = pygame.Rect(self.player.rect.x - 1, self.player.rect.centery, 10, 2)
         self.default_x = player.rect.x
         self.destroy = False
-        if self.player.image == self.player.imgleft:
+        if self.player.image == self.player.imgleft or self.player.image == self.player.image_move_left:
             self.direction = 'L'
         else:
             self.direction = 'R'
@@ -99,7 +99,7 @@ class rope(game_object):
 
     def draw(self):
         if self.show:
-            if self.player.image == self.player.imgleft:
+            if self.player.image == self.player.imgleft or self.player.image == self.player.image_move_left:
                 self.rect.centerx = self.player.rect.centerx + 2
                 self.img_boat_rect.centerx = self.player.rect.centerx + 35
             else:
@@ -112,6 +112,7 @@ class rope(game_object):
             self.screen.blit(self.img_boat, self.img_boat_rect)
             self.screen.blit(self.img_grass, self.img_grass_rect)
             self.screen.blit(self.img_grass, self.img_grass_rect2)
+            pygame.draw.rect(self.screen, (0, 0, 0), pygame.Rect((0, 0), (1200, 35)))
 
 class main_player(game_object):
     def __init__(self, window, imgleft, imgright):
@@ -181,6 +182,7 @@ class main_player(game_object):
             if self.image_move % 40 == 0:
                 if self.image == self.imgright:
                     self.image = self.image_move_right
+
                 else:
                     self.image = self.imgright
         self.image_move += 1
@@ -218,9 +220,11 @@ class prize(game_object):
     def __init__(self, window, image, glug):
         super().__init__(window, image, image)
         self.rect.centerx = random.randint(35, 1165)
-        self.rect.bottom = 7100
+        self.rect.bottom = 710
         self.free = True
         self.glug = glug
+        self.prize_at_boat = False
+        self.get_points = False
 
     def move(self):
         if self.free == False and self.show == True:
@@ -229,6 +233,7 @@ class prize(game_object):
             if self.glug.rect.top < 105:
                 self.show = False
                 self.glug.hand = True
+                self.prize_at_boat = True
 
 class game_state():
     def __init__(self, window):
@@ -241,7 +246,13 @@ class game_state():
         self.text_points_rect = self.text_points.get_rect()
         self.text_points_rect.top = 5
         self.text_points_rect.left = 5
-
+        self.is_move_rope = False
+        #self.text_points()
+    def create_text_points(self):
+        self.text_points = self.font.render(f'1:{self.get_text_points()}', True, (200, 200, 200), (0, 0, 0))
+        self.text_points_rect = self.text_points.get_rect()
+        self.text_points_rect.top = 5
+        self.text_points_rect.left = 5
     def show_state(self):
         self.screen.blit(self.text_points, self.text_points_rect)
 
@@ -251,3 +262,4 @@ class game_state():
             strpoints = '0'+strpoints
         print(strpoints)
         return strpoints
+
