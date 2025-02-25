@@ -216,15 +216,69 @@ class monsters(game_object):
             if self.rect.centerx >= self.distance:
                 self.new_point = True
 
+class meduse(monsters):
+    def __init__(self, window, image):
+        super().__init__(window, image, image)
+        self.speed = 0.2
+        self.new_pointy = True
+        self.distancey = 0
+
+    def move(self):
+        speed = self.speed
+        if self.new_point:
+            self.distance = random.randint(self.rect.x-150, self.rect.x+150)
+            if self.distance < 0:
+                self.distance = 0
+            if self.distance > 1200:
+                self.distance = 1200
+            self.new_point = False
+        if self.rect.centerx > self.distance:
+            self.x -= speed
+            self.rect.centerx = self.x
+            if self.rect.centerx <= self.distance:
+                self.new_point = True
+        else:
+            self.x += speed
+            self.rect.centerx = self.x
+            if self.rect.centerx >= self.distance:
+                self.new_point = True
+        if self.new_pointy:
+            self.distancey = random.randint(self.rect.y - 100, self.rect.y + 100)
+            if self.distancey < 100:
+                self.distancey = 100
+            if self.distancey > 650:
+                self.distancey = 650
+            self.new_pointy = False
+        if self.rect.centery > self.distancey:
+            self.y -= speed
+            self.rect.centery = self.y
+            if self.rect.centery <= self.distancey:
+                self.new_pointy = True
+        else:
+            self.y += speed
+            self.rect.centery = self.y
+            if self.rect.centery >= self.distancey:
+                self.new_pointy = True
+
+class crab(monsters):
+    def __init__(self, window, image):
+        super().__init__(window, image, image)
+        self.speed = 0.3
+        self.rect.top = 680
+
 class prize(game_object):
     def __init__(self, window, image, glug):
         super().__init__(window, image, image)
+        self.glug = glug
+        self.default_value()
+
+    def default_value(self):
         self.rect.centerx = random.randint(35, 1165)
         self.rect.bottom = 710
         self.free = True
-        self.glug = glug
         self.prize_at_boat = False
         self.get_points = False
+        self.show = True
 
     def move(self):
         if self.free == False and self.show == True:
@@ -247,6 +301,7 @@ class game_state():
         self.text_points_rect.top = 5
         self.text_points_rect.left = 5
         self.is_move_rope = False
+        self.get_prize = 2
         #self.text_points()
     def create_text_points(self):
         self.text_points = self.font.render(f'1:{self.get_text_points()}', True, (200, 200, 200), (0, 0, 0))
@@ -262,4 +317,11 @@ class game_state():
             strpoints = '0'+strpoints
         print(strpoints)
         return strpoints
+
+    def show_level(self):
+        img_level = pygame.image.load(f'L{self.level}.png')
+        img_level_rect = img_level.get_rect()
+        img_level_rect.centerx = 600
+        img_level_rect.centery = 350
+        self.screen.blit(img_level, img_level_rect)
 

@@ -1,7 +1,9 @@
 import random
 import sys
+import time
+
 import pygame
-from resource import main_player, monsters, prize, rope, bullet_system, game_state
+from resource import main_player, monsters, prize, rope, bullet_system, game_state, meduse, crab
 
 def destroy_bullets():
     for bullet in bullet_system_object.bullets_list.copy():
@@ -21,6 +23,7 @@ def bullet_action():
                 object_list.append(bullet)
 
 def all_actions(object_list):
+    global mode
     bullet_action()
     destroy_bullets()
     for object in object_list:
@@ -46,7 +49,67 @@ def all_actions(object_list):
             glug_glug_state.point += 40
             glug_glug_state.create_text_points()
             i.get_points = True
+            glug_glug_state.get_prize += 1
+    if glug_glug_state.get_prize == 3:
+        glug_glug_state.level += 1
+        glug_glug_state.get_prize = 0
+        mode = 'show level'
+        crest.default_value()
+        gold.default_value()
+        cup.default_value()
+        for item in object_list.copy():
+            try:
+                if type(item) == monsters or type(item) == meduse:
+                    object_list.remove(item)
+                    fish_list.remove(item)
+            except:
+                pass
+        if glug_glug_state.level == 2:
+            fish_L2()
+        elif glug_glug_state.level == 3:
+            fish_L3()
 
+def fish_L1():
+    for i in range(amount_fish_1):
+        fish = monsters(window, 'left_fish.png', 'right_fish.png')
+        if i % 2 == 0:
+            fish.rect.centerx -= random.randint(0, 10000)
+        else:
+            fish.rect.centerx = random.randint(1200, 11200)
+        fish.x = fish.rect.centerx
+        fish_list.append(fish)
+
+def fish_L2():
+    global object_list
+    delete_fish()
+    for i in range(amount_fish_2):
+        fish = meduse(window, 'fishlv2big.png')
+        if i % 2 == 0:
+            fish.rect.centerx -= random.randint(0, 5000)
+        else:
+            fish.rect.centerx = random.randint(1200, 6000)
+        fish.x = fish.rect.centerx
+        fish_list.append(fish)
+    object_list += fish_list
+
+def fish_L3():
+    global object_list
+    delete_fish()
+    for i in range(amount_fish_3):
+        fish = crab(window, 'crab.png')
+        if i % 2 == 0:
+            fish.rect.centerx -= random.randint(0, 5000)
+        else:
+            fish.rect.centerx = random.randint(1200, 5000)
+        fish.x = fish.rect.centerx
+        fish_list.append(fish)
+    object_list += fish_list
+
+def delete_fish():
+    global object_list
+    for fish in fish_list:
+        object_list.remove(fish)
+    fish_list.clear()
 def objects_touch(object1, object2):
     try:
         if pygame.sprite.collide_mask(object1, object2):
@@ -63,19 +126,10 @@ glug = main_player(window, 'left.png', 'right.png')
 rope = rope(window, 'rope.png', 'rope.png', glug)
 bullet_system_object = bullet_system(window, glug)
 amount_fish_1 = 30
+amount_fish_2 = 30
+amount_fish_3 = 5
 fish_list = []
-
-
-for i in range(amount_fish_1):
-    fish = monsters(window, 'fishlv2.png', 'right_fish.png')
-    if i % 2 == 0:
-        fish.rect.centerx -= random.randint(0, 10000)
-    else:
-        fish.rect.centerx = random.randint(1200, 11200)
-
-    fish.x = fish.rect.centerx
-    fish_list.append(fish)
-
+fish_L1()
 prize_list = []
 crest = prize(window, 'crest.png', glug)
 gold = prize(window, 'gold.png', glug)
@@ -88,12 +142,19 @@ object_list += prize_list
 object_list += fish_list
 object_list.append(rope)
 
+mode = 'show level'
+
 while True:
-    print(f'fish {len(fish_list)}')
-    print(f'bullet{len(bullet_system_object.bullets_list)}')
+    print(len(object_list))
     window.fill((0, 0, 0))
-    all_actions(object_list)
-    glug_glug_state.show_state()
+    if mode == 'show level':
+        glug_glug_state.show_level()
+        pygame.display.flip()
+        time.sleep(2)
+        mode = 'game'
+    else:
+        all_actions(object_list)
+        glug_glug_state.show_state()
     for i in pygame.event.get():
         if i.type == pygame.QUIT:
             sys.exit()
