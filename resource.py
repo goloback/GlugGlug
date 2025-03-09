@@ -37,7 +37,7 @@ class bullet(game_object):
         else:
             self.direction = 'R'
             self.rect.x += 30
-        self.speed = 0.6
+        self.speed = 1
         self.x = self.rect.x
 
     def draw(self):
@@ -132,8 +132,8 @@ class main_player(game_object):
         self.image_move_right = pygame.image.load('moveR.png')
 
     def move(self):
-        speed_walk = 0.2
-        speed = 0.5
+        speed_walk = 0.3
+        speed = 0.6
         if self.move_down:
             if self.rect.bottom < 710:
                 self.y += speed
@@ -187,6 +187,12 @@ class main_player(game_object):
                     self.image = self.imgright
         self.image_move += 1
 
+    def default_position(self):
+        self.x =self.screen.get_rect().centerx
+        self.y = 140
+        self.rect.centerx = self.x
+        self.rect.centery = self.y
+
 class monsters(game_object):
     def __init__(self, window, imgleft, imgright):
         super().__init__(window, imgleft, imgright)
@@ -196,7 +202,7 @@ class monsters(game_object):
         self.distance = 0
         self.x = self.rect.centerx
         self.y = self.rect.centery
-        self.speed = random.randint(23, 35) / 100
+        self.speed = random.randint(50, 70) / 100
 
     def move(self):
         speed = self.speed
@@ -226,7 +232,7 @@ class meduse(monsters):
     def move(self):
         speed = self.speed
         if self.new_point:
-            self.distance = random.randint(self.rect.x-150, self.rect.x+150)
+            self.distance = random.randint(self.rect.x-250, self.rect.x+250)
             if self.distance < 0:
                 self.distance = 0
             if self.distance > 1200:
@@ -243,7 +249,7 @@ class meduse(monsters):
             if self.rect.centerx >= self.distance:
                 self.new_point = True
         if self.new_pointy:
-            self.distancey = random.randint(self.rect.y - 100, self.rect.y + 100)
+            self.distancey = random.randint(self.rect.y - 200, self.rect.y + 200)
             if self.distancey < 100:
                 self.distancey = 100
             if self.distancey > 650:
@@ -265,6 +271,28 @@ class crab(monsters):
         super().__init__(window, image, image)
         self.speed = 0.3
         self.rect.top = 680
+
+class piranya(monsters):
+    def __init__(self, window, imagel, imager, player):
+        super().__init__(window, imagel, imager)
+        self.speed = 0.3
+        self.player = player
+
+    def move(self):
+        if self.player.rect.x > self.rect.x:
+            self.x += self.speed
+            self.image = self.imgright
+        else:
+            self.x -= self.speed
+            self.image = self.imgleft
+        self.rect.centerx = self.x
+        if self.player.rect.y > self.rect.y:
+            self.y += self.speed
+        else:
+            self.y -= self.speed
+        self.rect.centery = self.y
+
+
 
 class prize(game_object):
     def __init__(self, window, image, glug):
@@ -298,18 +326,30 @@ class game_state():
         self.font = pygame.font.Font(None, 25)
         self.text_points = self.font.render(f'1:{self.get_text_points()}', True, (200, 200, 200), (0, 0, 0))
         self.text_points_rect = self.text_points.get_rect()
-        self.text_points_rect.top = 5
+        self.text_points_rect.top = 10
         self.text_points_rect.left = 5
         self.is_move_rope = False
         self.get_prize = 2
         #self.text_points()
+        self.imgheart = pygame.image.load('heart.png')
+
+    def create_hearts(self):
+        x = 120
+        for i in range(self.hearts):
+            rect = self.imgheart.get_rect()
+            rect.top = 7
+            rect.left = x
+            self.screen.blit(self.imgheart, rect)
+            x += 30
+
     def create_text_points(self):
         self.text_points = self.font.render(f'1:{self.get_text_points()}', True, (200, 200, 200), (0, 0, 0))
         self.text_points_rect = self.text_points.get_rect()
-        self.text_points_rect.top = 5
+        self.text_points_rect.top = 10
         self.text_points_rect.left = 5
     def show_state(self):
         self.screen.blit(self.text_points, self.text_points_rect)
+        self.create_hearts()
 
     def get_text_points(self):
         strpoints = str(self.point)

@@ -3,7 +3,7 @@ import sys
 import time
 
 import pygame
-from resource import main_player, monsters, prize, rope, bullet_system, game_state, meduse, crab
+from resource import main_player, monsters, prize, rope, bullet_system, game_state, meduse, crab, piranya
 
 def destroy_bullets():
     for bullet in bullet_system_object.bullets_list.copy():
@@ -68,6 +68,7 @@ def all_actions(object_list):
             fish_L2()
         elif glug_glug_state.level == 3:
             fish_L3()
+    lose()
 
 def fish_L1():
     for i in range(amount_fish_1):
@@ -104,6 +105,23 @@ def fish_L3():
         fish.x = fish.rect.centerx
         fish_list.append(fish)
     object_list += fish_list
+    for i in range(amount_fish_4):
+        fish = piranya(window, 'piranyaL.png', 'piranyaR.png', glug)
+        if i % 2 == 0:
+            fish.rect.centerx -= random.randint(0, 5000)
+        else:
+            fish.rect.centerx = random.randint(1200, 5000)
+        fish.x = fish.rect.centerx
+        fish_list.append(fish)
+    object_list += fish_list
+
+def lose():
+    global mode
+    for fish in fish_list:
+        if objects_touch(fish, glug) and mode == 'game':
+            glug_glug_state.hearts -= 1
+            glug.default_position()
+            mode = 'show level'
 
 def delete_fish():
     global object_list
@@ -128,6 +146,7 @@ bullet_system_object = bullet_system(window, glug)
 amount_fish_1 = 30
 amount_fish_2 = 30
 amount_fish_3 = 5
+amount_fish_4 = 20
 fish_list = []
 fish_L1()
 prize_list = []
