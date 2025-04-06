@@ -37,7 +37,7 @@ class bullet(game_object):
         else:
             self.direction = 'R'
             self.rect.x += 30
-        self.speed = 1
+        self.speed = 2
         self.x = self.rect.x
 
     def draw(self):
@@ -132,8 +132,8 @@ class main_player(game_object):
         self.image_move_right = pygame.image.load('moveR.png')
 
     def move(self):
-        speed_walk = 0.3
-        speed = 0.6
+        speed_walk = 0.6
+        speed = 1.2
         if self.move_down:
             if self.rect.bottom < 710:
                 self.y += speed
@@ -202,7 +202,7 @@ class monsters(game_object):
         self.distance = 0
         self.x = self.rect.centerx
         self.y = self.rect.centery
-        self.speed = random.randint(50, 70) / 100
+        self.speed = random.randint(50, 70) / 50
 
     def move(self):
         speed = self.speed
@@ -225,7 +225,7 @@ class monsters(game_object):
 class meduse(monsters):
     def __init__(self, window, image):
         super().__init__(window, image, image)
-        self.speed = 0.2
+        self.speed = 0.4
         self.new_pointy = True
         self.distancey = 0
 
@@ -269,13 +269,13 @@ class meduse(monsters):
 class crab(monsters):
     def __init__(self, window, image):
         super().__init__(window, image, image)
-        self.speed = 0.3
+        self.speed = 0.6
         self.rect.top = 680
 
 class piranya(monsters):
     def __init__(self, window, imagel, imager, player):
         super().__init__(window, imagel, imager)
-        self.speed = 0.3
+        self.speed = 0.6
         self.player = player
 
     def move(self):
@@ -291,8 +291,6 @@ class piranya(monsters):
         else:
             self.y -= self.speed
         self.rect.centery = self.y
-
-
 
 class prize(game_object):
     def __init__(self, window, image, glug):
@@ -329,10 +327,14 @@ class game_state():
         self.text_points_rect.top = 10
         self.text_points_rect.left = 5
         self.is_move_rope = False
-        self.get_prize = 2
+        self.get_prize = 0
         #self.text_points()
         self.imgheart = pygame.image.load('heart.png')
+        self.record = self.get_record()
 
+    def get_record(self):
+        with open('record.txt') as file_record :
+            return int(file_record.read())
     def create_hearts(self):
         x = 120
         for i in range(self.hearts):
@@ -350,6 +352,11 @@ class game_state():
     def show_state(self):
         self.screen.blit(self.text_points, self.text_points_rect)
         self.create_hearts()
+        self.text_record = self.font.render(f'record:{self.get_text_record()}', True, (200, 200, 200), (0, 0, 0))
+        self.text_record_rect = self.text_record.get_rect()
+        self.text_record_rect.left = 1070
+        self.text_record_rect.top = 10
+        self.screen.blit(self.text_record, self.text_record_rect)
 
     def get_text_points(self):
         strpoints = str(self.point)
@@ -358,8 +365,20 @@ class game_state():
         print(strpoints)
         return strpoints
 
+    def get_text_record(self):
+        strrecord = str(self.record)
+        while len(strrecord) < 6:
+            strrecord = '0'+strrecord
+        return strrecord
+
     def show_level(self):
-        img_level = pygame.image.load(f'L{self.level}.png')
+        if self.level == 4:
+            img_level = pygame.image.load('victory.png')
+        else:
+            if self.hearts == 0:
+                img_level = pygame.image.load('game_over.png')
+            else:
+                img_level = pygame.image.load(f'L{self.level}.png')
         img_level_rect = img_level.get_rect()
         img_level_rect.centerx = 600
         img_level_rect.centery = 350

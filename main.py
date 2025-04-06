@@ -69,6 +69,8 @@ def all_actions(object_list):
         elif glug_glug_state.level == 3:
             fish_L3()
     lose()
+    if glug_glug_state.point > glug_glug_state.record:
+        glug_glug_state.record = glug_glug_state.point
 
 def fish_L1():
     for i in range(amount_fish_1):
@@ -117,10 +119,19 @@ def fish_L3():
 
 def lose():
     global mode
-    for fish in fish_list:
+    for fish in fish_list.copy():
         if objects_touch(fish, glug) and mode == 'game':
             glug_glug_state.hearts -= 1
             glug.default_position()
+            i = 0
+            for fish_ in fish_list:
+                if i % 2 == 0:
+                    fish_.rect.centerx -= random.randint(0, 10000)
+                    fish_.x = fish_.rect.centerx
+                else:
+                    fish_.rect.centerx = random.randint(1200, 11200)
+                    fish_.x = fish_.rect.centerx
+                i += 1
             mode = 'show level'
 
 def delete_fish():
@@ -136,6 +147,11 @@ def objects_touch(object1, object2):
             return False
     except:
         return False
+
+def set_new_record():
+    with open('record.txt', 'w') as record_file:
+        record_file.write(str(glug_glug_state.record))
+
 
 pygame.init()
 window = pygame.display.set_mode((1200, 750))
@@ -163,6 +179,8 @@ object_list.append(rope)
 
 mode = 'show level'
 
+clock = pygame.time.Clock()
+
 while True:
     print(len(object_list))
     window.fill((0, 0, 0))
@@ -170,6 +188,12 @@ while True:
         glug_glug_state.show_level()
         pygame.display.flip()
         time.sleep(2)
+        if glug_glug_state.level == 4:
+            set_new_record()
+            break
+        if glug_glug_state.hearts == 0:
+            set_new_record()
+            break
         mode = 'game'
     else:
         all_actions(object_list)
@@ -202,3 +226,4 @@ while True:
                 bullet_system_object.press_space = False
 
     pygame.display.flip()
+    clock.tick(60)
